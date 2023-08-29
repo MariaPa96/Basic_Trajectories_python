@@ -1,6 +1,6 @@
 # Trajectories calculator basic code
 
-This repository contains a code (Trajectories_AOD.py) for calculating back and forwards trajectories from the basic theory, this is recommended for operational work and a general overview of scalars transport (this contains the possibility to follow aerosols). The code Trajectories_AOD has shown high versatility, for its use only four key steps are needed. The third step is actually optional if you do not want to run the code recognizing the AOD then you can skip this.   
+This repository contains a code (Trajectories_AOD.py) for calculating back and forward trajectories from the basic theory. The code is recommended for operational work and general overviewing of scalar transport (this contains the possibility of following aerosols). Trajectories_AOD has shown high versatility for its use; in fact, only four steps are needed. The third step is actually optional, so if you do not want to run the code identifying the AOD in each step, you can skip this. 
 
 1. Clone the Trajectories_AOD.py code.
 
@@ -11,11 +11,11 @@ Name the files as AOD_%m-%Y.nc (example: AOD_08-2019.nc)
 
 4. Change the self.path in the .py for the file where you store the data downloaded on steps 2 and 3. 
 
-Now an example, imagine I want to calculate the trajectories for every day in January 2022 without AOD, then I need to ensure to have in my path the files uwnd.2022.nc, vwnd.2022.nc and omega.2022.nc. The following script in Python language should work: 
+Now imagine I want to calculate the trajectories for every day in January 2022 without AOD, then I need to ensure to have in my path the files uwnd.2022.nc, vwnd.2022.nc and omega.2022.nc. The following script in Python language should work: 
 
 ## Let's start to code!
 
-Import the packets, pickle is really useful for storing the resulting dictionary; however, I know also pandas have that function now, but is really not needed for running the trajectories.
+First import the packets. Pickle is really useful for storing the resulting dictionary, also pandas have that function now. Nonetheless, none of them are compulsory for running the code.
 ```ruby
 import Trajectories_AOD  #### line 0
 import pickle            #### line 1
@@ -46,7 +46,7 @@ dict_keys(['lat_traj', 'lon_traj', 'plev_traj', 'datetime_traj', 'steps_traj'])
 - datetime_traj: has the starting time of all trajectories ran.
 - steps_traj: contains the date and time for every step.
   
-Those are at the same time dictionaries with three dimensions, the first one regarding every starting pressure level, the second every starting date, and the last one the trajectories longitude in step time. 
+Those are also dictionaries with three dimensions, the first one references every starting pressure level, the second every starting date, and the last one the trajectories longitude in step time. 
 
 The following lines are for storing the dictionary self.BT
 ```ruby
