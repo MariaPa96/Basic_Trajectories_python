@@ -1,4 +1,6 @@
-# Trajectories calculator basic code
+# Basic trajectories calculator
+
+*The code base of this package is given by Jhayron S. Pérez-Carrasquilla, who used it in different research, as in [Hoyos et al.(2019)](https://nhess.copernicus.org/articles/19/2635/2019/nhess-19-2635-2019.html). This code was constructed as a package to improve its versatility in work with the [Sistema de Alerta Temprana de Medellín y el Valle de Aburrá (SIATA)](https://siata.gov.co/siata_nuevo/).*
 
 This repository contains a code (Trajectories_AOD.py) for calculating back and forward trajectories from the basic theory, represented by the following equation:
 
