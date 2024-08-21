@@ -3,25 +3,23 @@
 #
 
 import matplotlib
-#matplotlib.use('Template')
-matplotlib.use('PDF')
 import numpy as np
 import datetime as dt
 import os
-import glob
-#import utm
-import pickle
 import netCDF4 as nc
-import matplotlib.pyplot as plt
 import pandas as pd
-from scipy.signal import argrelextrema
+import matplotlib.pyplot as plt
+import cartopy
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import matplotlib.ticker as mticker
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
-import shapefile as shp
-import matplotlib.font_manager as font_manager
-
+#######################################################
 ### https://psl.noaa.gov/data/gridded/data.ncep.reanalysis.html
 ### https://downloads.psl.noaa.gov/Datasets/ncep.reanalysis/pressure/
 #######################################################
+
 def find_nearest_idx(array, value):
     # Encuentra la posición  más cercano en un array 1D
     array = np.asarray(array)
@@ -36,7 +34,7 @@ class Follow:
 		#os.system('mkdir Figuras')
 		self.Fechai      = (dt.datetime.now()-relativedelta(months=1)).strftime('%Y-%m-')+'01 01:00' if (Fechaf == None) else Fechai
 		self.Fechaf      = (pd.to_datetime(self.Fechai)+ relativedelta(months=1)-dt.timedelta(hours=1)).strftime('%Y-%m-%d %H:%M') if (Fechaf == None) else Fechaf
-		self.path	=  'E:/ERA/Trayectorias/' if path==None else path
+		self.path	=  'D:/ERA/Trayectorias/' if path==None else path
 		self.lati	=  lati
 		self.loni	=  loni
 
@@ -51,9 +49,9 @@ class Follow:
 			self.lon_dataset = dataset_for_localization.variables['lon'][:].data
 			self.levels = dataset_for_localization.variables['level'][:].data
 			self.lon_dataset[self.lon_dataset>180] = self.lon_dataset[self.lon_dataset>180]-360
-
+			self.dataset_aod = None
 		except:
-			print ('We did not find the file: %d'%unico)
+			print ('Al parecer no existen los archivos de las componentes de la velocidad del viento para el año %d'%unico)
 
 		self.datetimes_dataset = np.array([dt.datetime(1800,1,1,0,0)+
 				              dt.timedelta(hours = float(dataset_for_localization.variables['time'][:].data[i])) 
@@ -94,7 +92,9 @@ class Follow:
 		omega = self.dataset_omega.variables['omega'][pos_date,pos_level,pos_lat,pos_lon].data[()]
 
 		if self.AOD:
-			if dti.month!=self.month:
+			self.month  = self.fechas[0].month
+			if (dti.month!=self.month) or (self.dataset_aod==None):
+				
 				self.Read_AOD(month=dti.month,year=dti.year)
 
 			pos_date = find_nearest_idx(self.datetimes_aod,dti)
@@ -115,7 +115,7 @@ class Follow:
 		dx = u*delta_t*60*60 ## meters
 		dy = v*delta_t*60*60 ## meters
 		dz = (w/100)*delta_t*60*60 ##hPa
-		print ('I am running :)')
+		#print ('si estoy entrando a esta funcion')
 		plev = plev0+(-dz if Backtrajectorie else dz)
 		r_earth = 6378000
 		if Backtrajectorie:
@@ -129,7 +129,7 @@ class Follow:
 		return new_latitude, new_longitude, plev
 
 
-	def compute_BT(self,*args,**kwargs): #datetime0,lat0,lon0,plev0='surface',delta_t=1,days_back=5): # plev0 en hPa, delta t en horas. #máximo 4 días
+	def compute_BT(self,*args,**kwargs): 
 		datetime0 =	kwargs.get('datetime0',None)
 		lat0	=	kwargs.get('lat0',None)
 		lon0	=	kwargs.get('lon0',None)
@@ -212,6 +212,7 @@ class Follow:
 		self.ndays		= kwargs.get('ndays',8)
 		self.delta_t		= kwargs.get('delta_t',3)
 		self.AOD		= kwargs.get('AOD',True)
+		self.levels_iter = kwargs.get('plevels',self.levels_iter)
 
 		self.datetimes_iter = np.array(pd.date_range(self.Fechai,self.Fechaf,freq='3H').to_pydatetime().tolist())
 		tres = 3
@@ -227,7 +228,7 @@ class Follow:
 
 		for li,leveli in enumerate(self.levels_iter):
 			for di,dti in enumerate(self.datetimes_iter):
-				print (leveli,dti)
+				#print (leveli,dti)
 				if self.AOD:
 					#try:
 						self.compute_BT(datetime0=dti,lat0=self.lati,lon0=self.loni,plev0=leveli, AOD=self.AOD)
@@ -238,5 +239,41 @@ class Follow:
 
 					self.BT['lat_traj'][li,di,:], self.BT['lon_traj'][li,di,:], self.BT['plev_traj'][li,di,:], self.BT['datetime_traj'][li,di,:],self.BT['steps_traj'][li,di,:] = self.compute_BT(datetime0=dti,lat0=self.lati,lon0=self.loni,plev0=leveli, AOD=self.AOD)
 
-		if self.AOD:
-			self.Hots_Spot()
+
+	def Plot_Trajectories(self,*args,**kwargs):
+		os.system('mkdir '+self.path+'Figuras')
+		fig = plt.figure(figsize=(9,8))
+		ax = plt.axes(projection=ccrs.PlateCarree())
+
+		ax.set_extent([ np.round(self.BT['lon_traj'].min()-2,1), np.round(self.BT['lon_traj'].max()+2,1), np.round(self.BT['lat_traj'].min()-2,1), np.round(self.BT['lat_traj'].max()+2,1)], crs=ccrs.PlateCarree())
+
+		for li,leveli in enumerate(self.levels_iter):
+			for di,dti in enumerate(self.datetimes_iter):
+				cs=ax.scatter(self.BT['lon_traj'][li,di,:], self.BT['lat_traj'][li,di,:],c=self.BT['aod_traj'][li,di,:],cmap='jet',vmin=0,vmax=0.8,s=10)
+
+		ax.add_feature(cfeature.LAND,color="whitesmoke")
+		ax.add_feature(cfeature.COASTLINE,color='dimgray')
+		ax.add_feature(cfeature.OCEAN,color='skyblue')
+
+		ax.add_feature(cfeature.BORDERS, linestyle='-',color='dimgray',lw=0.7)
+
+		gl = ax.gridlines(draw_labels=True, dms=False, x_inline=False, y_inline=False,color='none')
+		gl.top_labels = False
+		gl.right_labels = False
+		gl.left_labels = True
+		gl.ylocator = mticker.FixedLocator(np.arange(-90.,90,10.))
+		gl.xlocator = mticker.FixedLocator(np.arange(-180, 180, 10.))
+		gl.xformatter = LONGITUDE_FORMATTER
+		gl.yformatter = LATITUDE_FORMATTER
+		gl.xlabel_style = {'size': 11, 'color': 'black'}
+		gl.ylabel_style = {'size': 11, 'color': 'black'}
+
+		plt.scatter(self.loni,self.lati,marker='*',color='k',cmap='jet',vmin=0.3,vmax=1.5,s=220,edgecolors='k',zorder=100)
+
+		#prop = font_manager.FontProperties(size=14)
+		cax = plt.axes([0.94, 0.15, 0.02, 0.7])
+		cbar = plt.colorbar(cs, cax=cax,ticks=np.arange(0,0.9,0.1),format="%.1f",extend='max')
+
+		cbar.set_label(u'AOD Total (550 nm)')
+
+		plt.savefig(self.path+'Figuras/BT_%s.png'%self.Fechai[:10],bbox_inches='tight',dpi=300)
