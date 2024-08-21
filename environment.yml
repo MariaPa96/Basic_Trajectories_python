@@ -1,0 +1,15 @@
+name: Traj
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - ipykernel
+  - pickle
+  - pandas
+  - numpy
+  - cartopy
+  - matplotlib
+  - netcdf4
+  - xarray
+  - scipy
