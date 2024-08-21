@@ -1,0 +1,8 @@
+pickle
+pandas
+numpy
+cartopy
+matplotlib
+netcdf4
+xarray
+scipy
