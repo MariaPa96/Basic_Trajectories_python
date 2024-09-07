@@ -1,4 +1,5 @@
 # Basic trajectories calculator
+[![DOI](https://zenodo.org/badge/681665732.svg)](https://zenodo.org/doi/10.5281/zenodo.13730207)
 
 This repository contains a code (Trajectories_AOD.py) for calculating back and forward trajectories from the basic theory, represented by the following equation:
 
