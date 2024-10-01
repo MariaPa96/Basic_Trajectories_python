@@ -19,9 +19,9 @@ conda env create -f environment.yml
 conda install --yes --file requirements.txt
 ```
 
-2. Download the wind components U-wind, V-wind, and Omega 4X Daily pressure levels from NCEP-NCAR Reanalysis 1 data provided by the NOAA PSL, Boulder, Colorado, USA, from their website at https://downloads.psl.noaa.gov/Datasets/ncep.reanalysis/pressure/.
+2. Download the wind components U-wind, V-wind, and Omega 4X Daily pressure levels from NCEP-NCAR Reanalysis 1 data provided by the NOAA PSL, Boulder, Colorado, USA, from their website at https://downloads.psl.noaa.gov/Datasets/ncep.reanalysis/pressure/ (last access: 1 October 2024). You will quickly identify them as uwnd.YYYY.nc, vwnd.YYYY.nc and omega.YYYY.nc, where YYYY is a four-number format of the year (e.g. 2024).
    
-   *Optional*: Download monthly Total Aerosol Optical Depth at 550nm, step 0, Time  00:00 y 12:00 provided by CAMS-Copernicus from their website at https://ads.atmosphere.copernicus.eu/cdsapp#!/dataset/cams-global-atmospheric-composition-forecasts?tab=overview
+   *Optional*: Download monthly Total Aerosol Optical Depth at 550nm, step 0, Time  00:00 y 12:00 provided by CAMS-Copernicus from their website at https://ads.atmosphere.copernicus.eu/datasets/cams-global-reanalysis-eac4 (last access: 1 October 2024).
 Name the files as AOD_%m-%Y.nc (e.g., AOD_08-2019.nc)
 
    Please ensure you know your data's location and that all data is stored in the same folder.
